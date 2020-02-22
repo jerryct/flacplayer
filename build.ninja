@@ -1,0 +1,109 @@
+
+rule gen_bin
+    command = python3 $in
+
+rule flac
+    command = flac --silent -f -o $out --endian=little --sign=signed --channels=2 --bps=$bps --sample-rate=44100 $in
+
+build 16bps_part0.bin $
+      16bps_part1.bin $
+      16bps_part2.bin $
+      16bps_part3.bin $
+      16bps_part4.bin $
+      16bps_part5.bin $
+      16bps_part6.bin $
+      16bps_part7.bin $
+      16bps_part8.bin $
+      16bps_part9.bin $
+      16bps_part10.bin $
+      16bps_part11.bin $
+      16bps_part12.bin $
+      16bps_part13.bin $
+      16bps_part14.bin: gen_bin gen_16bps.py
+
+build 16bps_part0.flac: flac 16bps_part0.bin
+    bps = 16
+build 16bps_part1.flac: flac 16bps_part1.bin
+    bps = 16
+build 16bps_part2.flac: flac 16bps_part2.bin
+    bps = 16
+build 16bps_part3.flac: flac 16bps_part3.bin
+    bps = 16
+build 16bps_part4.flac: flac 16bps_part4.bin
+    bps = 16
+build 16bps_part5.flac: flac 16bps_part5.bin
+    bps = 16
+build 16bps_part6.flac: flac 16bps_part6.bin
+    bps = 16
+build 16bps_part7.flac: flac 16bps_part7.bin
+    bps = 16
+build 16bps_part8.flac: flac 16bps_part8.bin
+    bps = 16
+build 16bps_part9.flac: flac 16bps_part9.bin
+    bps = 16
+build 16bps_part10.flac: flac 16bps_part10.bin
+    bps = 16
+build 16bps_part11.flac: flac 16bps_part11.bin
+    bps = 16
+build 16bps_part12.flac: flac 16bps_part12.bin
+    bps = 16
+build 16bps_part13.flac: flac 16bps_part13.bin
+    bps = 16
+build 16bps_part14.flac: flac 16bps_part14.bin
+    bps = 16
+
+build 24bps_part0.bin $
+      24bps_part1.bin $
+      24bps_part2.bin $
+      24bps_part3.bin $
+      24bps_part4.bin $
+      24bps_part5.bin $
+      24bps_part6.bin $
+      24bps_part7.bin $
+      24bps_part8.bin $
+      24bps_part9.bin $
+      24bps_part10.bin $
+      24bps_part11.bin $
+      24bps_part12.bin $
+      24bps_part13.bin $
+      24bps_part14.bin: gen_bin gen_24bps.py
+
+build 24bps_part0.flac: flac 24bps_part0.bin
+    bps = 24
+build 24bps_part1.flac: flac 24bps_part1.bin
+    bps = 24
+build 24bps_part2.flac: flac 24bps_part2.bin
+    bps = 24
+build 24bps_part3.flac: flac 24bps_part3.bin
+    bps = 24
+build 24bps_part4.flac: flac 24bps_part4.bin
+    bps = 24
+build 24bps_part5.flac: flac 24bps_part5.bin
+    bps = 24
+build 24bps_part6.flac: flac 24bps_part6.bin
+    bps = 24
+build 24bps_part7.flac: flac 24bps_part7.bin
+    bps = 24
+build 24bps_part8.flac: flac 24bps_part8.bin
+    bps = 24
+build 24bps_part9.flac: flac 24bps_part9.bin
+    bps = 24
+build 24bps_part10.flac: flac 24bps_part10.bin
+    bps = 24
+build 24bps_part11.flac: flac 24bps_part11.bin
+    bps = 24
+build 24bps_part12.flac: flac 24bps_part12.bin
+    bps = 24
+build 24bps_part13.flac: flac 24bps_part13.bin
+    bps = 24
+build 24bps_part14.flac: flac 24bps_part14.bin
+    bps = 24
+
+rule gen_profdata
+    command = llvm-profdata-8 merge -sparse $in -o $out
+rule gen_html
+    command =  llvm-cov-8 show -format=html -output-dir=$out $binary -instr-profile=$in
+
+build default.profdata: gen_profdata _build_debug/default.profraw
+build cov: gen_html default.profdata
+    binary = _build_debug/unit_tests

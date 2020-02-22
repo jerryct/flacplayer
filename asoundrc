@@ -1,0 +1,21 @@
+pcm.write_file {
+    type file
+    slave {
+        pcm plug_uln2
+    }
+    file "uln2-raw-%f-%r-%c.raw"
+    format "raw"
+}
+
+pcm.plug_uln2 {
+    type plug
+    slave {
+        pcm uln2
+        rate unchanged
+    }
+}
+
+pcm.uln2 {
+    type hw
+    card "ULN2"
+}
