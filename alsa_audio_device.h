@@ -11,21 +11,10 @@
 namespace plac {
 
 struct Params {
-  // distance between interrupts is # microseconds
-  unsigned period_time;
-  // buffer duration is # microseconds
-  unsigned buffer_time;
   // distance between interrupts is # frames
   snd_pcm_uframes_t period_frames;
   // buffer duration is # frames
   snd_pcm_uframes_t buffer_frames;
-  // min available space for wakeup is # microseconds
-  int avail_min;
-  // delay for automatic PCM start is # microseconds (relative to buffer size if <= 0)
-  int start_delay;
-  // delay for automatic PCM stop is # microseconds from xrun
-  int stop_delay;
-  snd_pcm_uframes_t chunk_size;
 };
 
 enum class Status : int { run, drain };

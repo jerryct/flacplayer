@@ -1,8 +1,14 @@
 # flacplayer
 
+## Quickstart
+
 ```
 cmake -H. -B_build_arm -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=arm_toolchain.cmake
 ```
+
+Copy [`asoundrc`](https://www.alsa-project.org/main/index.php/Asoundrc) into your home directory as `.asoundrc`.
+
+## Misc
 
 http://www.volkerschatz.com/noise/alsa.html
 
@@ -11,9 +17,6 @@ cat /proc/asound/card1/pcm0p/sub0/status
 cat /proc/asound/card1/pcm0p/sub0/sw_params
 cat /proc/asound/card1/pcm0p/sub0/hw_params
 ```
-
-start threshold disabled to avoid automatic start
-stop threshold not disabled to stop playback in case of underrun
 
 https://www.kernel.org/doc/html/latest/sound/designs/timestamping.html
 
@@ -49,4 +52,4 @@ ULN2 hardware parameters
  TICK_TIME: ALL
 ```
 
-Then periodsize * period is your total buffer size in bytes.
+Then period size * period is your total buffer size in bytes.

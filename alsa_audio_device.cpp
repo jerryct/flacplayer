@@ -32,21 +32,13 @@ struct Logger {
 
 void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   Params p;
-  p.period_time = 0;
-  p.buffer_time = 0;
-  p.period_frames = 0;
-  p.buffer_frames = 0;
-  p.avail_min = -1;
-  p.start_delay = 0;
-  p.stop_delay = 0;
-  p.chunk_size = 1024;
+  p.buffer_frames = AsFrames(f, 228000);
+  unsigned buffer_period_ratio{4};
+  p.period_frames = p.buffer_frames / buffer_period_ratio;
   AudioFormat info = f;
   Logger log;
 
   int err;
-  size_t n;
-
-  snd_pcm_uframes_t start_threshold, stop_threshold;
 
   snd_pcm_hw_params_t *params;
   snd_pcm_hw_params_alloca(&params);
@@ -87,32 +79,12 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   ENSURES(err >= 0, "cannot set rate near");
   ENSURES(rate == info.rate, "rate modified");
 
-  if (p.buffer_time == 0 && p.buffer_frames == 0) {
-    err = snd_pcm_hw_params_get_buffer_time_max(params, &p.buffer_time, 0);
-    ENSURES(err >= 0, "cannot get buffer time max");
-    if (p.buffer_time > 500000) {
-      p.buffer_time = 500000;
-    }
-  }
-  if (p.period_time == 0 && p.period_frames == 0) {
-    if (p.buffer_time > 0) {
-      p.period_time = p.buffer_time / 4;
-    } else {
-      p.period_frames = p.buffer_frames / 4;
-    }
-  }
-  if (p.period_time > 0) {
-    err = snd_pcm_hw_params_set_period_time_near(handle_, params, &p.period_time, 0);
-  } else {
-    err = snd_pcm_hw_params_set_period_size_near(handle_, params, &p.period_frames, 0);
-  }
+  err = snd_pcm_hw_params_set_buffer_size(handle_, params, p.buffer_frames);
+  ENSURES(err >= 0, "cannot set buffer size");
+  err = snd_pcm_hw_params_set_period_size(handle_, params, p.period_frames, 0);
   ENSURES(err >= 0, "cannot set period size");
-  if (p.buffer_time > 0) {
-    err = snd_pcm_hw_params_set_buffer_time_near(handle_, params, &p.buffer_time, 0);
-  } else {
-    err = snd_pcm_hw_params_set_buffer_size_near(handle_, params, &p.buffer_frames);
-  }
-  ENSURES(err >= 0, "cannot set buffer time");
+  err = snd_pcm_hw_params_set_periods_near(handle_, params, &buffer_period_ratio, 0);
+  ENSURES(err >= 0, "cannot set buffer/period ratio");
 
   err = snd_pcm_hw_params(handle_, params);
   if (err < 0) {
@@ -120,46 +92,24 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
     snd_pcm_hw_params_dump(params, log.log);
     exit(EXIT_FAILURE);
   }
-  snd_pcm_hw_params_get_period_size(params, &p.chunk_size, 0);
-  snd_pcm_uframes_t buffer_size;
-  snd_pcm_hw_params_get_buffer_size(params, &buffer_size);
-  ENSURES(p.chunk_size != buffer_size, "cannot use period equal to buffer size ({} == {})", p.chunk_size, buffer_size);
 
   snd_pcm_sw_params_t *swparams;
   snd_pcm_sw_params_alloca(&swparams);
   err = snd_pcm_sw_params_current(handle_, swparams);
   ENSURES(err >= 0, "unable to get current sw params");
 
-  if (p.avail_min < 0) {
-    n = p.chunk_size;
-  } else {
-    n = (double)rate * p.avail_min / 1000000;
-  }
-  err = snd_pcm_sw_params_set_avail_min(handle_, swparams, n);
+  err = snd_pcm_sw_params_set_avail_min(handle_, swparams, p.period_frames);
   ENSURES(err >= 0, "cannot set avail min");
-
-  /* round up to closest transfer boundary */
-  n = buffer_size;
-  if (p.start_delay <= 0) {
-    start_threshold = n + (double)rate * p.start_delay / 1000000;
-  } else {
-    start_threshold = (double)rate * p.start_delay / 1000000;
-  }
-  if (start_threshold < 1) {
-    start_threshold = 1;
-  }
-  if (start_threshold > n) {
-    start_threshold = n;
-  }
-  err = snd_pcm_sw_params_set_start_threshold(handle_, swparams, start_threshold);
-  ENSURES(err >= 0, "cannot set start threshold");
-  if (p.stop_delay <= 0) {
-    stop_threshold = buffer_size + (double)rate * p.stop_delay / 1000000;
-  } else {
-    stop_threshold = (double)rate * p.stop_delay / 1000000;
-  }
-  err = snd_pcm_sw_params_set_stop_threshold(handle_, swparams, stop_threshold);
+  // stop threshold not disabled to stop playback in case of underrun
+  err = snd_pcm_sw_params_set_stop_threshold(handle_, swparams, p.buffer_frames);
   ENSURES(err >= 0, "cannot set stop threshold");
+  // start threshold disabled to avoid automatic start
+  err = snd_pcm_sw_params_set_start_threshold(handle_, swparams, std::numeric_limits<snd_pcm_uframes_t>::max());
+  ENSURES(err >= 0, "cannot set start threshold");
+  err = snd_pcm_sw_params_set_tstamp_mode(handle_, swparams, SND_PCM_TSTAMP_ENABLE);
+  ENSURES(err >= 0, "cannot set tstamp mode");
+  err = snd_pcm_sw_params_set_tstamp_type(handle_, swparams, SND_PCM_TSTAMP_TYPE_MONOTONIC_RAW);
+  ENSURES(err >= 0, "cannot set tstamp mode");
 
   if (snd_pcm_sw_params(handle_, swparams) < 0) {
     LOG_ERROR("unable to install sw params:");
@@ -171,15 +121,17 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
     snd_pcm_dump(handle_, log.log);
   }
 
-  p.buffer_frames = buffer_size; /* for position test */
-
   format_.bits = snd_pcm_format_physical_width(format);
   snd_pcm_hw_params_get_channels(params, &format_.channels);
   snd_pcm_hw_params_get_rate(params, &format_.rate, nullptr);
 
   EXPECTS(info == f, "");
   EXPECTS(format_ == f, "");
-  params_ = p;
+
+  snd_pcm_hw_params_get_period_size(params, &params_.period_frames, 0);
+  EXPECTS(p.period_frames == params_.period_frames, "");
+  snd_pcm_hw_params_get_buffer_size(params, &params_.buffer_frames);
+  EXPECTS(p.buffer_frames == params_.buffer_frames, "");
 }
 
 namespace {
@@ -214,7 +166,7 @@ void AlsaAudioDevice::Playback(std::atomic<Status> &status) {
   pcm_write_flac(handle_, audio_buffer_, format_, params_.buffer_frames);
 
   while (status == Status::run) {
-    pcm_write_flac(handle_, audio_buffer_, format_, params_.chunk_size);
+    pcm_write_flac(handle_, audio_buffer_, format_, params_.period_frames);
   }
 
   if (status == Status::drain) {
