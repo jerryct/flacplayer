@@ -31,10 +31,6 @@ struct Logger {
 } // namespace
 
 void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
-  Params p;
-  p.buffer_size = AsFrames(f, 228000);
-  const unsigned buffer_period_ratio{4};
-  p.period_size = p.buffer_size / buffer_period_ratio;
   AudioFormat info = f;
   Logger log;
 
@@ -78,6 +74,11 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   err = snd_pcm_hw_params_set_rate_near(handle_, params, &info.rate, nullptr);
   ENSURES(err >= 0, "cannot set rate near");
   ENSURES(rate == info.rate, "rate modified");
+
+  Params p;
+  p.buffer_size = AsFrames(f, 228000);
+  const unsigned buffer_period_ratio{4};
+  p.period_size = p.buffer_size / buffer_period_ratio;
 
   err = snd_pcm_hw_params_set_buffer_size(handle_, params, p.buffer_size);
   ENSURES(err >= 0, "cannot set buffer size");
