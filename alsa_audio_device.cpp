@@ -101,11 +101,9 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
 
   err = snd_pcm_sw_params_set_avail_min(handle_, swparams, p.period_size);
   ENSURES(err >= 0, "cannot set avail min");
-  // stop threshold not disabled to stop playback in case of underrun
   err = snd_pcm_sw_params_set_stop_threshold(handle_, swparams, p.buffer_size);
   ENSURES(err >= 0, "cannot set stop threshold");
-  // start threshold disabled to avoid automatic start
-  err = snd_pcm_sw_params_set_start_threshold(handle_, swparams, std::numeric_limits<snd_pcm_uframes_t>::max());
+  err = snd_pcm_sw_params_set_start_threshold(handle_, swparams, p.buffer_size);
   ENSURES(err >= 0, "cannot set start threshold");
   err = snd_pcm_sw_params_set_tstamp_mode(handle_, swparams, SND_PCM_TSTAMP_ENABLE);
   ENSURES(err >= 0, "cannot set tstamp mode");
@@ -135,39 +133,21 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   EXPECTS(p.buffer_size == params_.buffer_size, "");
 }
 
-namespace {
-// https://git.alsa-project.org/?p=alsa-lib.git;a=blob;f=src/pcm/pcm.c;h=bc18954b92da124bafd3a67913bd3c8900dd012f;hb=HEAD#l7864
-ssize_t pcm_write_flac(snd_pcm_t *handle, AudioBuffer<228000> &audio_buffer, AudioFormat format, size_t count) {
-  auto writer = [handle](AudioFormat format, u_char *data, size_t count) {
-    auto n = snd_pcm_writei(handle, data, count);
-    if ((n == -EAGAIN) || ((n >= 0) && (static_cast<size_t>(n) < count))) {
-      snd_pcm_wait(handle, 100);
-    } else if (n < 0) {
-      n = snd_pcm_recover(handle, n, 0);
-      ENSURES(n >= 0, "write error: {}", snd_strerror(n));
-    }
-
-    return n;
-  };
-
-  ssize_t result = 0;
-  while (count > 0) {
-    const ssize_t n = audio_buffer.Read(format, count, writer);
-    if (n >= 0) {
-      result += n;
-      count -= n;
-    }
-  }
-
-  return result;
-}
-} // namespace
-
 void AlsaAudioDevice::Playback(std::atomic<Status> &status) {
-  pcm_write_flac(handle_, audio_buffer_, format_, params_.buffer_size);
-
   while (status == Status::run) {
-    pcm_write_flac(handle_, audio_buffer_, format_, params_.period_size);
+    auto writer = [this](AudioFormat, u_char *data, size_t count) {
+      auto n = snd_pcm_writei(handle_, data, count);
+      if ((n == -EAGAIN) || ((n >= 0) && (static_cast<size_t>(n) < count))) {
+        snd_pcm_wait(handle_, 100);
+      } else if (n < 0) {
+        n = snd_pcm_recover(handle_, n, 0);
+        ENSURES(n >= 0, "write error: {}", snd_strerror(n));
+      }
+
+      return n;
+    };
+
+    audio_buffer_.Read(format_, params_.period_size, writer);
   }
 
   if (status == Status::drain) {
