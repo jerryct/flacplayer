@@ -33,7 +33,7 @@ struct Logger {
 void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   Params p;
   p.buffer_frames = AsFrames(f, 228000);
-  unsigned buffer_period_ratio{4};
+  const unsigned buffer_period_ratio{4};
   p.period_frames = p.buffer_frames / buffer_period_ratio;
   AudioFormat info = f;
   Logger log;
@@ -83,7 +83,7 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   ENSURES(err >= 0, "cannot set buffer size");
   err = snd_pcm_hw_params_set_period_size(handle_, params, p.period_frames, 0);
   ENSURES(err >= 0, "cannot set period size");
-  err = snd_pcm_hw_params_set_periods_near(handle_, params, &buffer_period_ratio, 0);
+  err = snd_pcm_hw_params_set_periods(handle_, params, buffer_period_ratio, 0);
   ENSURES(err >= 0, "cannot set buffer/period ratio");
 
   err = snd_pcm_hw_params(handle_, params);
