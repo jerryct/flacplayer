@@ -4,6 +4,7 @@
 #define AUDIO_BUFFER_H
 
 #include "audio_format.h"
+#include "conditions.h"
 #include <atomic>
 #include <cstddef>
 #include <sys/types.h>
@@ -71,6 +72,7 @@ public:
     while (count != 0) {
       const ssize_t n{Read(format, count, std::forward<F>(Write))};
       if (n < 0) {
+        LOG_ERROR("dropping {} frames", count);
         return n;
       }
       count -= static_cast<std::size_t>(n);
