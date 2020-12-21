@@ -29,12 +29,6 @@ struct AlsaAudioDevice {
     open_mode |= SND_PCM_NO_SOFTVOL;
     // open_mode |= SND_PCM_NONBLOCK;
 
-    const int nonblock = 0;
-    if (nonblock) {
-      const int err = snd_pcm_nonblock(handle_, 1);
-      ENSURES(err >= 0, "nonblock setting error: {}", snd_strerror(err));
-    }
-
     const char *name{"plug_uln2"};
     const int err = snd_pcm_open(&handle_, name, SND_PCM_STREAM_PLAYBACK, open_mode);
     ENSURES(err >= 0, "audio open error: {}", snd_strerror(err));

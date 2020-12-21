@@ -172,9 +172,8 @@ void AlsaAudioDevice::Playback(std::atomic<Status> &status) {
   if (status == Status::drain) {
     auto writer = [this](AudioFormat, u_char *data, size_t count) { return snd_pcm_writei(handle_, data, count); };
     audio_buffer_.Drain(format_, writer);
-    snd_pcm_nonblock(handle_, 0);
+    snd_pcm_nonblock(handle_, /* block= */ 0);
     snd_pcm_drain(handle_);
-    // snd_pcm_nonblock(handle_, nonblock);
   } else {
     snd_pcm_drop(handle_);
   }
