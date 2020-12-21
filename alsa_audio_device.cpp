@@ -32,9 +32,9 @@ struct Logger {
 
 void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   Params p;
-  p.buffer_frames = AsFrames(f, 228000);
+  p.buffer_size = AsFrames(f, 228000);
   const unsigned buffer_period_ratio{4};
-  p.period_frames = p.buffer_frames / buffer_period_ratio;
+  p.period_size = p.buffer_size / buffer_period_ratio;
   AudioFormat info = f;
   Logger log;
 
@@ -79,9 +79,9 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   ENSURES(err >= 0, "cannot set rate near");
   ENSURES(rate == info.rate, "rate modified");
 
-  err = snd_pcm_hw_params_set_buffer_size(handle_, params, p.buffer_frames);
+  err = snd_pcm_hw_params_set_buffer_size(handle_, params, p.buffer_size);
   ENSURES(err >= 0, "cannot set buffer size");
-  err = snd_pcm_hw_params_set_period_size(handle_, params, p.period_frames, 0);
+  err = snd_pcm_hw_params_set_period_size(handle_, params, p.period_size, 0);
   ENSURES(err >= 0, "cannot set period size");
   err = snd_pcm_hw_params_set_periods(handle_, params, buffer_period_ratio, 0);
   ENSURES(err >= 0, "cannot set buffer/period ratio");
@@ -98,10 +98,10 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   err = snd_pcm_sw_params_current(handle_, swparams);
   ENSURES(err >= 0, "unable to get current sw params");
 
-  err = snd_pcm_sw_params_set_avail_min(handle_, swparams, p.period_frames);
+  err = snd_pcm_sw_params_set_avail_min(handle_, swparams, p.period_size);
   ENSURES(err >= 0, "cannot set avail min");
   // stop threshold not disabled to stop playback in case of underrun
-  err = snd_pcm_sw_params_set_stop_threshold(handle_, swparams, p.buffer_frames);
+  err = snd_pcm_sw_params_set_stop_threshold(handle_, swparams, p.buffer_size);
   ENSURES(err >= 0, "cannot set stop threshold");
   // start threshold disabled to avoid automatic start
   err = snd_pcm_sw_params_set_start_threshold(handle_, swparams, std::numeric_limits<snd_pcm_uframes_t>::max());
@@ -128,10 +128,10 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   EXPECTS(info == f, "");
   EXPECTS(format_ == f, "");
 
-  snd_pcm_hw_params_get_period_size(params, &params_.period_frames, 0);
-  EXPECTS(p.period_frames == params_.period_frames, "");
-  snd_pcm_hw_params_get_buffer_size(params, &params_.buffer_frames);
-  EXPECTS(p.buffer_frames == params_.buffer_frames, "");
+  snd_pcm_hw_params_get_period_size(params, &params_.period_size, 0);
+  EXPECTS(p.period_size == params_.period_size, "");
+  snd_pcm_hw_params_get_buffer_size(params, &params_.buffer_size);
+  EXPECTS(p.buffer_size == params_.buffer_size, "");
 }
 
 namespace {
@@ -163,10 +163,10 @@ ssize_t pcm_write_flac(snd_pcm_t *handle, AudioBuffer<228000> &audio_buffer, Aud
 } // namespace
 
 void AlsaAudioDevice::Playback(std::atomic<Status> &status) {
-  pcm_write_flac(handle_, audio_buffer_, format_, params_.buffer_frames);
+  pcm_write_flac(handle_, audio_buffer_, format_, params_.buffer_size);
 
   while (status == Status::run) {
-    pcm_write_flac(handle_, audio_buffer_, format_, params_.period_frames);
+    pcm_write_flac(handle_, audio_buffer_, format_, params_.period_size);
   }
 
   if (status == Status::drain) {
