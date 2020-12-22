@@ -18,12 +18,9 @@ public:
 
   ssize_t Write(const AudioFormat format, const int *const left, const int *const right, const size_t count) {
     const unsigned int frame_size{format.bits / 8 * format.channels};
+    const size_t result{std::min(count, AsFrames(format, N - size_))};
 
-    for (int i{0}; i < count; ++i) {
-      if ((N - size_) < frame_size) {
-        return i;
-      }
-
+    for (int i{0}; i < result; ++i) {
       if (format.bits == 16) {
         data_[in_] = left[i] & 0xFF;
         data_[(in_ + 1) % N] = left[i] >> 8 & 0xFF;
@@ -39,10 +36,10 @@ public:
       }
 
       in_ = (in_ + frame_size) % N;
-      size_ += frame_size;
     }
+    size_ += AsBytes(format, result);
 
-    return count;
+    return result;
   }
 
   template <typename T> ssize_t Read(const AudioFormat format, const size_t count, T &&pipe) {
