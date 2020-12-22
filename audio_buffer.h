@@ -46,7 +46,7 @@ public:
   }
 
   template <typename T> ssize_t Read(const AudioFormat format, const size_t count, T &&pipe) {
-    if (AsFrames(format, size_) < count) {
+    if (size_ < AsBytes(format, count)) {
       return 0;
     }
 
