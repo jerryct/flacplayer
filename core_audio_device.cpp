@@ -23,14 +23,14 @@ OSStatus Raw16(const AudioObjectID /*unused*/, const AudioTimeStamp * /*unused*/
       out[2] = data[4 * i + 1];
       out[4] = data[4 * i + 2];
       out[5] = data[4 * i + 3];
-      out += 24;
+      out += 12;
     }
     return count;
   };
 
   AudioFormat physical_format{};
   physical_format.bits = 24;
-  physical_format.channels = 8;
+  physical_format.channels = 4;
 
   auto count = AsFrames(physical_format, output->mBuffers[0].mDataByteSize);
   while (count > 0) {
@@ -57,14 +57,14 @@ OSStatus Raw24(const AudioObjectID /*unused*/, const AudioTimeStamp * /*unused*/
       out[3] = data[6 * i + 3];
       out[4] = data[6 * i + 4];
       out[5] = data[6 * i + 5];
-      out += 24;
+      out += 12;
     }
     return count;
   };
 
   AudioFormat physical_format{};
   physical_format.bits = 24;
-  physical_format.channels = 8;
+  physical_format.channels = 4;
 
   auto count = AsFrames(physical_format, output->mBuffers[0].mDataByteSize);
   while (count > 0) {
@@ -203,8 +203,8 @@ AudioFormat SetStreamFormat(const AudioObjectID id, const AudioFormat format) {
   desc.mFormatID = kAudioFormatLinearPCM;
   desc.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked | kAudioFormatFlagIsNonMixable;
   desc.mBitsPerChannel = 24;
-  desc.mChannelsPerFrame = 8;
-  desc.mBytesPerFrame = 24;
+  desc.mChannelsPerFrame = 4;
+  desc.mBytesPerFrame = 12;
   desc.mFramesPerPacket = 1;
   desc.mBytesPerPacket = desc.mFramesPerPacket * desc.mBytesPerFrame;
 
