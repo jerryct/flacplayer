@@ -32,6 +32,8 @@ link_libraries(
   ${DEFAULT_LINKOPTS}
 )
 
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "")
+add_subdirectory(../benchmark _build/benchmark)
 add_subdirectory(../googletest _build/googletest)
 add_subdirectory(../fmt _build/fmt)
 
@@ -60,3 +62,8 @@ add_executable(unit_tests
   stream_unit_test.cpp
 )
 target_link_libraries(unit_tests PRIVATE plac gtest_main)
+
+add_executable(benchmarks
+  audio_buffer_benchmark.cpp
+)
+target_link_libraries(benchmarks PRIVATE plac benchmark::benchmark)
