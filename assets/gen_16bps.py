@@ -8,6 +8,6 @@ for i in range(0, 15):
         a.append((value >> 16) & 0xFF)
         a.append(value & 0xFF)
 
-    f = open("16bps_part{}.bin".format(i), "wb")
+    f = open("assets/16bps_part{}.bin".format(i), "wb")
     a_as_bytes = bytes(a)
     f.write(a_as_bytes)

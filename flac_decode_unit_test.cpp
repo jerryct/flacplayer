@@ -51,21 +51,21 @@ TEST_F(FlacDecodeTest, Play16Bps) {
   DummyWriter16Bps writer{};
 
   for (const char *name : {
-           "../16bps_part0.flac",
-           "../16bps_part1.flac",
-           "../16bps_part2.flac",
-           "../16bps_part3.flac",
-           "../16bps_part4.flac",
-           "../16bps_part5.flac",
-           "../16bps_part6.flac",
-           "../16bps_part7.flac",
-           "../16bps_part8.flac",
-           "../16bps_part9.flac",
-           "../16bps_part10.flac",
-           "../16bps_part11.flac",
-           "../16bps_part12.flac",
-           "../16bps_part13.flac",
-           "../16bps_part14.flac",
+           "../assets/16bps_part0.flac",
+           "../assets/16bps_part1.flac",
+           "../assets/16bps_part2.flac",
+           "../assets/16bps_part3.flac",
+           "../assets/16bps_part4.flac",
+           "../assets/16bps_part5.flac",
+           "../assets/16bps_part6.flac",
+           "../assets/16bps_part7.flac",
+           "../assets/16bps_part8.flac",
+           "../assets/16bps_part9.flac",
+           "../assets/16bps_part10.flac",
+           "../assets/16bps_part11.flac",
+           "../assets/16bps_part12.flac",
+           "../assets/16bps_part13.flac",
+           "../assets/16bps_part14.flac",
        }) {
     ASSERT_TRUE(stream.Reset(name));
 
@@ -89,21 +89,21 @@ TEST_F(FlacDecodeTest, Play24Bps) {
   DummyWriter24Bps writer{};
 
   for (const char *name : {
-           "../24bps_part0.flac",
-           "../24bps_part1.flac",
-           "../24bps_part2.flac",
-           "../24bps_part3.flac",
-           "../24bps_part4.flac",
-           "../24bps_part5.flac",
-           "../24bps_part6.flac",
-           "../24bps_part7.flac",
-           "../24bps_part8.flac",
-           "../24bps_part9.flac",
-           "../24bps_part10.flac",
-           "../24bps_part11.flac",
-           "../24bps_part12.flac",
-           "../24bps_part13.flac",
-           "../24bps_part14.flac",
+           "../assets/24bps_part0.flac",
+           "../assets/24bps_part1.flac",
+           "../assets/24bps_part2.flac",
+           "../assets/24bps_part3.flac",
+           "../assets/24bps_part4.flac",
+           "../assets/24bps_part5.flac",
+           "../assets/24bps_part6.flac",
+           "../assets/24bps_part7.flac",
+           "../assets/24bps_part8.flac",
+           "../assets/24bps_part9.flac",
+           "../assets/24bps_part10.flac",
+           "../assets/24bps_part11.flac",
+           "../assets/24bps_part12.flac",
+           "../assets/24bps_part13.flac",
+           "../assets/24bps_part14.flac",
        }) {
     ASSERT_TRUE(stream.Reset(name));
 
