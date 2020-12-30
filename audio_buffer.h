@@ -17,25 +17,32 @@ public:
   bool IsEmpty() const { return size_ == 0; }
 
   ssize_t Write(const AudioFormat format, const int *const left, const int *const right, const size_t count) {
-    const unsigned int frame_size{format.bits / 8 * format.channels};
     const size_t result{std::min(count, AsFrames(format, N - size_))};
 
-    for (int i{0}; i < result; ++i) {
-      if (format.bits == 16) {
-        data_[in_] = left[i] & 0xFF;
-        data_[(in_ + 1) % N] = left[i] >> 8 & 0xFF;
-        data_[(in_ + 2) % N] = right[i] & 0xFF;
-        data_[(in_ + 3) % N] = right[i] >> 8 & 0xFF;
-      } else if (format.bits == 24) {
-        data_[in_] = left[i] & 0xFF;
-        data_[(in_ + 1) % N] = left[i] >> 8 & 0xFF;
-        data_[(in_ + 2) % N] = left[i] >> 16 & 0xFF;
-        data_[(in_ + 3) % N] = right[i] & 0xFF;
-        data_[(in_ + 4) % N] = right[i] >> 8 & 0xFF;
-        data_[(in_ + 5) % N] = right[i] >> 16 & 0xFF;
-      }
+    if (format.bits == 16) {
+      for (int i{0}; i < result; ++i) {
+        std::uint32_t interleaved{static_cast<std::uint32_t>(right[i])};
+        interleaved <<= 16;
+        interleaved |= static_cast<std::uint32_t>(left[i]) & 0xFFFF;
+        std::memcpy(&data_[in_], &interleaved, 4);
 
-      in_ = (in_ + frame_size) % N;
+        in_ += 4;
+        if (in_ == N) {
+          in_ = 0;
+        }
+      }
+    } else if (format.bits == 24) {
+      for (int i{0}; i < result; ++i) {
+        std::uint64_t interleaved{static_cast<std::uint32_t>(right[i])};
+        interleaved <<= 24;
+        interleaved |= static_cast<std::uint64_t>(left[i]) & 0xFFFFFF;
+        std::memcpy(&data_[in_], &interleaved, 6);
+
+        in_ += 6;
+        if (in_ == N) {
+          in_ = 0;
+        }
+      }
     }
     size_ += AsBytes(format, result);
 
