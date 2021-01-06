@@ -32,7 +32,7 @@ link_libraries(
   ${DEFAULT_LINKOPTS}
 )
 
-add_subdirectory(/usr/src/googletest _build/googletest)
+add_subdirectory(../googletest _build/googletest)
 add_subdirectory(../fmt _build/fmt)
 
 add_library(plac
