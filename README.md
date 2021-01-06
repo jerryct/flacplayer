@@ -6,7 +6,8 @@
 cmake -H. -B_build_arm -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=arm_toolchain.cmake
 ```
 
-Copy [`asoundrc`](https://www.alsa-project.org/main/index.php/Asoundrc) into your home directory as `.asoundrc`.
+Copy [`asoundrc`](https://www.alsa-project.org/main/index.php/Asoundrc) into your home directory as `.asoundrc`
+or as a system wide configuration `/etc/asound.conf`.
 
 ## Misc
 
