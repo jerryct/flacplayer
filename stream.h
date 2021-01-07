@@ -6,12 +6,13 @@
 #include "audio_buffer.h"
 #include "audio_format.h"
 #include "file_desc.h"
+#include "flow_control.h"
 #include <FLAC/stream_decoder.h>
 
 namespace plac {
 
 struct Stream {
-  Stream(AudioBuffer<228000> &audio_buffer);
+  Stream(AudioBuffer<228000> &audio_buffer, FlowControl &flow);
   Stream(Stream &) = delete;
   Stream(Stream &&) = delete;
   Stream &operator=(Stream &) = delete;
@@ -44,6 +45,7 @@ struct Stream {
   FileDesc desc_;
   AudioFormat format_;
   AudioBuffer<228000> &audio_buffer_;
+  FlowControl &flow_;
 };
 
 } // namespace plac

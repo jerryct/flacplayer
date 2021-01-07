@@ -5,12 +5,13 @@
 
 #include "audio_buffer.h"
 #include "audio_format.h"
+#include "flow_control.h"
 #include <CoreAudio/AudioHardware.h>
 
 namespace plac {
 
 struct CoreAudioDevice {
-  CoreAudioDevice(AudioBuffer<228000> &audio_buffer);
+  CoreAudioDevice(AudioBuffer<228000> &audio_buffer, FlowControl &flow);
   CoreAudioDevice(CoreAudioDevice &) = delete;
   CoreAudioDevice(CoreAudioDevice &&) = delete;
   CoreAudioDevice &operator=(CoreAudioDevice &) = delete;
@@ -24,6 +25,7 @@ struct CoreAudioDevice {
   AudioDeviceIOProcID proc_id_;
   AudioFormat format_;
   AudioBuffer<228000> &audio_buffer_;
+  FlowControl &flow_;
 };
 
 } // namespace plac

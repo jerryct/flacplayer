@@ -47,7 +47,8 @@ struct DummyWriter24Bps {
 };
 
 TEST_F(FlacDecodeTest, Play16Bps) {
-  Stream stream{audio_buffer_};
+  FlowControl flow{};
+  Stream stream{audio_buffer_, flow};
   DummyWriter16Bps writer{};
 
   for (const char *name : {
@@ -85,7 +86,8 @@ TEST_F(FlacDecodeTest, Play16Bps) {
 }
 
 TEST_F(FlacDecodeTest, Play24Bps) {
-  Stream stream{audio_buffer_};
+  FlowControl flow{};
+  Stream stream{audio_buffer_, flow};
   DummyWriter24Bps writer{};
 
   for (const char *name : {

@@ -3,7 +3,6 @@
 #include "stream.h"
 #include <cctype>
 #include <cstring>
-#include <thread>
 
 namespace plac {
 
@@ -57,7 +56,7 @@ FLAC__StreamDecoderWriteStatus write_callback(const FLAC__StreamDecoder *decoder
   while (length != 0) {
     const ssize_t n = stream->audio_buffer_.Write(stream->format_, left, right, length);
     if ((n >= 0) && (static_cast<size_t>(n) < length)) {
-      std::this_thread::sleep_for(std::chrono::milliseconds{5});
+      stream->flow_.Await();
     }
     length -= n;
     left += n;
@@ -120,8 +119,8 @@ void metadata_callback(const FLAC__StreamDecoder *decoder, const FLAC__StreamMet
 
 } // namespace
 
-Stream::Stream(AudioBuffer<228000> &audio_buffer)
-    : decoder_{FLAC__stream_decoder_new()}, desc_{}, format_{}, audio_buffer_{audio_buffer} {
+Stream::Stream(AudioBuffer<228000> &audio_buffer, FlowControl &flow)
+    : decoder_{FLAC__stream_decoder_new()}, desc_{}, format_{}, audio_buffer_{audio_buffer}, flow_{flow} {
   FLAC__stream_decoder_set_metadata_respond(decoder_, FLAC__METADATA_TYPE_VORBIS_COMMENT);
   FLAC__StreamDecoderInitStatus init_status =
       FLAC__stream_decoder_init_stream(decoder_, read_callback, nullptr, nullptr, nullptr, nullptr, write_callback,

@@ -148,6 +148,7 @@ void AlsaAudioDevice::Playback(std::atomic<Status> &status) {
     };
 
     audio_buffer_.Read(format_, params_.period_size, writer);
+    flow_.Notify();
   }
 
   if (status == Status::drain) {

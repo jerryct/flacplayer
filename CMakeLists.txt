@@ -43,6 +43,7 @@ add_library(plac
   bit_cast.h
   conditions.h
   file_desc.h
+  flow_control.h
   stream.cpp
   stream.h
 )

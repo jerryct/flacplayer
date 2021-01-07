@@ -6,6 +6,7 @@
 #include "audio_buffer.h"
 #include "audio_format.h"
 #include "conditions.h"
+#include "flow_control.h"
 #include <alsa/asoundlib.h>
 
 namespace plac {
@@ -34,8 +35,8 @@ struct Params {
 enum class Status : int { run, drain };
 
 struct AlsaAudioDevice {
-  AlsaAudioDevice(AudioBuffer<228000> &audio_buffer)
-      : handle_{nullptr}, format_{}, params_{}, audio_buffer_{audio_buffer} {
+  AlsaAudioDevice(AudioBuffer<228000> &audio_buffer, FlowControl &flow)
+      : handle_{nullptr}, format_{}, params_{}, audio_buffer_{audio_buffer}, flow_{flow} {
     int open_mode = 0;
     open_mode |= SND_PCM_NO_AUTO_RESAMPLE;
     // open_mode |= SND_PCM_NO_AUTO_CHANNELS;
@@ -60,6 +61,7 @@ struct AlsaAudioDevice {
   AudioFormat format_;
   Params params_;
   AudioBuffer<228000> &audio_buffer_;
+  FlowControl &flow_;
 };
 
 } // namespace plac

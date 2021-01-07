@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
 
 #include "core_audio_device.h"
+#include "flow_control.h"
 #include "stream.h"
 
 int main(int argc, char *argv[]) {
   EXPECTS(argc > 1, "no file provided");
 
-  ::plac::AudioBuffer<228000> audio_buffer;
-  ::plac::Stream stream{audio_buffer};
-  ::plac::CoreAudioDevice device{audio_buffer};
+  ::plac::FlowControl flow{};
+  ::plac::AudioBuffer<228000> audio_buffer{};
+  ::plac::Stream stream{audio_buffer, flow};
+  ::plac::CoreAudioDevice device{audio_buffer, flow};
 
   bool first{true};
   for (int i{1}; i < argc; ++i) {

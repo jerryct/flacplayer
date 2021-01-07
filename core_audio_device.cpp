@@ -40,6 +40,7 @@ OSStatus Raw16(const AudioObjectID /*unused*/, const AudioTimeStamp * /*unused*/
     }
   }
 
+  dec->flow_.Notify();
   return noErr;
 }
 
@@ -74,6 +75,7 @@ OSStatus Raw24(const AudioObjectID /*unused*/, const AudioTimeStamp * /*unused*/
     }
   }
 
+  dec->flow_.Notify();
   return noErr;
 }
 
@@ -234,8 +236,8 @@ AudioFormat SetStreamFormat(const AudioObjectID id, const AudioFormat format) {
 
 } // namespace
 
-CoreAudioDevice::CoreAudioDevice(AudioBuffer<228000> &audio_buffer)
-    : uln2_{}, proc_id_{}, format_{}, audio_buffer_{audio_buffer} {}
+CoreAudioDevice::CoreAudioDevice(AudioBuffer<228000> &audio_buffer, FlowControl &flow)
+    : uln2_{}, proc_id_{}, format_{}, audio_buffer_{audio_buffer}, flow_{flow} {}
 
 CoreAudioDevice::~CoreAudioDevice() {
   OSStatus err = noErr;

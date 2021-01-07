@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT
 
 #include "alsa_audio_device.h"
+#include "flow_control.h"
 #include "stream.h"
 #include <thread>
 
 int main(int argc, char *argv[]) {
   EXPECTS(argc > 1, "no file provided");
 
-  ::plac::AudioBuffer<228000> audio_buffer;
-  ::plac::AlsaAudioDevice device{audio_buffer};
-  ::plac::Stream stream{audio_buffer};
+  ::plac::FlowControl flow{};
+  ::plac::AudioBuffer<228000> audio_buffer{};
+  ::plac::AlsaAudioDevice device{audio_buffer, flow};
+  ::plac::Stream stream{audio_buffer, flow};
   std::atomic<::plac::Status> status{::plac::Status::run};
   std::thread audio{};
 
