@@ -19,7 +19,7 @@ void Write16Bit(benchmark::State &state) {
     benchmark::DoNotOptimize(b.Write(format, left.data(), right.data(), size));
     benchmark::ClobberMemory();
 
-    b.Drain(format, [](const plac::AudioFormat, u_char *, const size_t count) { return count; });
+    b.Drain(format, [](plac::AudioFormat, const u_char *, const size_t count) { return count; });
   }
 }
 
@@ -36,7 +36,7 @@ void Write24Bit(benchmark::State &state) {
     benchmark::DoNotOptimize(b.Write(format, left.data(), right.data(), size));
     benchmark::ClobberMemory();
 
-    b.Drain(format, [](const plac::AudioFormat, u_char *, const size_t count) { return count; });
+    b.Drain(format, [](plac::AudioFormat, const u_char *, const size_t count) { return count; });
   }
 }
 

@@ -13,7 +13,7 @@ protected:
 };
 
 struct DummyWriter16Bps {
-  ssize_t operator()(AudioFormat format, u_char *data, size_t count) {
+  ssize_t operator()(const AudioFormat format, const u_char *const data, const size_t count) {
     EXPECT_EQ(16, format.bits);
     for (int i = 0; i < count; ++i) {
       EXPECT_EQ(total & 0xFF, data[4 * i + 0]);
@@ -29,7 +29,7 @@ struct DummyWriter16Bps {
 };
 
 struct DummyWriter24Bps {
-  ssize_t operator()(AudioFormat format, u_char *data, size_t count) {
+  ssize_t operator()(const AudioFormat format, const u_char *const data, const size_t count) {
     EXPECT_EQ(24, format.bits);
     for (int i = 0; i < count; ++i) {
       EXPECT_EQ((total >> 0) & 0xFF, data[6 * i + 0]);

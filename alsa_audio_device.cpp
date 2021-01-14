@@ -135,7 +135,7 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
 
 void AlsaAudioDevice::Playback(std::atomic<Status> &status) {
   while (status == Status::run) {
-    auto writer = [this](AudioFormat, u_char *data, size_t count) {
+    auto writer = [this](AudioFormat, const u_char *const data, const size_t count) {
       auto n = snd_pcm_writei(handle_, data, count);
       if ((n == -EAGAIN) || ((n >= 0) && (static_cast<size_t>(n) < count))) {
         snd_pcm_wait(handle_, 100);
@@ -152,7 +152,7 @@ void AlsaAudioDevice::Playback(std::atomic<Status> &status) {
   }
 
   if (status == Status::drain) {
-    auto writer = [this](AudioFormat, u_char *data, size_t count) -> snd_pcm_sframes_t {
+    auto writer = [this](AudioFormat, const u_char *const data, const size_t count) -> snd_pcm_sframes_t {
       if (count < params_.period_size) {
         return -EINVAL;
       } else {

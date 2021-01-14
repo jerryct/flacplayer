@@ -3,6 +3,7 @@
 #ifndef AUDIO_BUFFER_H
 #define AUDIO_BUFFER_H
 
+#include "as_const.h"
 #include "audio_format.h"
 #include "conditions.h"
 #include <atomic>
@@ -57,10 +58,10 @@ public:
     ssize_t result{0};
 
     if ((out_ + AsBytes(format, count)) <= N) {
-      result = std::forward<T>(pipe)(format, &data_[out_], count);
+      result = std::forward<T>(pipe)(format, &AsConst(*this).data_[out_], count);
     } else {
       const size_t rest{AsFrames(format, (out_ + AsBytes(format, count)) % N)};
-      result = std::forward<T>(pipe)(format, &data_[out_], (count - rest));
+      result = std::forward<T>(pipe)(format, &AsConst(*this).data_[out_], (count - rest));
     }
 
     if (result >= 0) {

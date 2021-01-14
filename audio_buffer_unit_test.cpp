@@ -20,7 +20,7 @@ protected:
 
 TEST_F(AudioBufferTest, Construct) {
   AudioBuffer<24> buffer;
-  auto reader = [](AudioFormat, u_char *, size_t count) { return static_cast<ssize_t>(count); };
+  auto reader = [](AudioFormat, const u_char *, const size_t count) { return static_cast<ssize_t>(count); };
 
   EXPECT_FLOAT_EQ(0.0F, buffer.GetFillLevel());
   EXPECT_TRUE(buffer.IsEmpty());
@@ -45,7 +45,7 @@ TEST_F(AudioBufferTest, Write) {
 
 TEST_F(AudioBufferTest, Read) {
   AudioBuffer<24> buffer;
-  auto reader = [](AudioFormat, u_char *, size_t count) { return static_cast<ssize_t>(count); };
+  auto reader = [](AudioFormat, const u_char *, const size_t count) { return static_cast<ssize_t>(count); };
 
   EXPECT_EQ(4, buffer.Write(format_, left_.cbegin(), right_.cbegin(), 4));
   EXPECT_FLOAT_EQ(1.0F, buffer.GetFillLevel());
@@ -62,7 +62,7 @@ TEST_F(AudioBufferTest, Read) {
 
 TEST_F(AudioBufferTest, ReadWhenWrapAround) {
   AudioBuffer<24> buffer;
-  auto reader = [](AudioFormat, u_char *, size_t count) { return static_cast<ssize_t>(count); };
+  auto reader = [](AudioFormat, const u_char *, const size_t count) { return static_cast<ssize_t>(count); };
 
   EXPECT_EQ(3, buffer.Write(format_, left_.cbegin(), right_.cbegin(), 3));
   EXPECT_EQ(0, buffer.Drain(format_, reader));
@@ -73,7 +73,7 @@ TEST_F(AudioBufferTest, ReadWhenWrapAround) {
 
 TEST_F(AudioBufferTest, ReadWhenError) {
   AudioBuffer<24> buffer;
-  auto reader = [](AudioFormat, u_char *, size_t) { return -23; };
+  auto reader = [](AudioFormat, const u_char *, size_t) { return -23; };
 
   EXPECT_EQ(3, buffer.Write(format_, left_.cbegin(), right_.cbegin(), 3));
   EXPECT_FLOAT_EQ(0.75F, buffer.GetFillLevel());
@@ -84,7 +84,7 @@ TEST_F(AudioBufferTest, ReadWhenError) {
 
 TEST_F(AudioBufferTest, DrainWhenError) {
   AudioBuffer<24> buffer;
-  auto reader = [](AudioFormat, u_char *, size_t) { return -23; };
+  auto reader = [](AudioFormat, const u_char *, size_t) { return -23; };
 
   EXPECT_EQ(3, buffer.Write(format_, left_.cbegin(), right_.cbegin(), 3));
   EXPECT_FLOAT_EQ(0.75F, buffer.GetFillLevel());
@@ -95,7 +95,7 @@ TEST_F(AudioBufferTest, DrainWhenError) {
 
 TEST_F(AudioBufferTest, WriteRead) {
   AudioBuffer<24> buffer;
-  auto reader = [](AudioFormat, u_char *, size_t count) { return static_cast<ssize_t>(count); };
+  auto reader = [](AudioFormat, const u_char *, const size_t count) { return static_cast<ssize_t>(count); };
 
   EXPECT_EQ(4, buffer.Write(format_, left_.cbegin(), right_.cbegin(), 4));
   EXPECT_FLOAT_EQ(1.0F, buffer.GetFillLevel());
@@ -123,7 +123,8 @@ TEST_F(AudioBufferTest, Recover) {
   std::vector<int> left_recovered;
   std::vector<int> right_recovered;
 
-  auto reader = [&left_recovered, &right_recovered](AudioFormat format, u_char *data, size_t count) {
+  auto reader = [&left_recovered, &right_recovered](const AudioFormat format, const u_char *const data,
+                                                    const size_t count) {
     const auto channel_size = format.bits / 8;
     const auto frame_size = channel_size * 2;
 

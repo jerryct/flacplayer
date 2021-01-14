@@ -38,6 +38,7 @@ add_subdirectory(../googletest _build/googletest)
 add_subdirectory(../fmt _build/fmt)
 
 add_library(plac
+  as_const.h
   audio_buffer.h
   audio_format.h
   bit_cast.h
