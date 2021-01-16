@@ -18,7 +18,7 @@ struct FileDesc {
   FileDesc() = default;
   FileDesc(const char *name) : fd_{open(name, O_RDONLY, 0)} {}
   FileDesc(FileDesc &) = delete;
-  FileDesc(FileDesc &&other) noexcept : fd_{other.fd_} { fd_ = -1; }
+  FileDesc(FileDesc &&other) noexcept : fd_{other.fd_} { other.fd_ = -1; }
   FileDesc &operator=(FileDesc &) = delete;
   FileDesc &operator=(FileDesc &&other) noexcept {
     if (fd_ != other.fd_) {

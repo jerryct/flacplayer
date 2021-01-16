@@ -105,7 +105,7 @@ struct StringRef {
   StringRef() : ref{nullptr} {}
   StringRef(CFStringRef _ref) : ref{_ref} {}
   StringRef(StringRef &) = delete;
-  StringRef(StringRef &&other) noexcept : ref{other.ref} { ref = nullptr; }
+  StringRef(StringRef &&other) noexcept : ref{other.ref} { other.ref = nullptr; }
   StringRef &operator=(StringRef &) = delete;
   StringRef &operator=(StringRef &&) = delete;
   ~StringRef() noexcept {

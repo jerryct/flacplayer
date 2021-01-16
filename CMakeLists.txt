@@ -60,6 +60,7 @@ target_link_libraries(flacplayer PRIVATE asound plac)
 add_executable(unit_tests
   audio_buffer_unit_test.cpp
   audio_format_unit_test.cpp
+  file_desc_unit_test.cpp
   flac_decode_unit_test.cpp
   stream_unit_test.cpp
 )
