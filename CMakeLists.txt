@@ -32,6 +32,10 @@ link_libraries(
   ${DEFAULT_LINKOPTS}
 )
 
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
+
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "")
 add_subdirectory(../benchmark _build/benchmark)
 add_subdirectory(../googletest _build/googletest)
@@ -48,7 +52,7 @@ add_library(plac
   stream.cpp
   stream.h
 )
-target_link_libraries(plac PUBLIC FLAC pthread fmt)
+target_link_libraries(plac PUBLIC FLAC Threads::Threads fmt)
 
 add_executable(flacplayer
   alsa_audio_device.cpp
