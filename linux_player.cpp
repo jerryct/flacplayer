@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   ::plac::AudioBuffer<228000> audio_buffer{};
   ::plac::AlsaAudioDevice device{audio_buffer, flow};
   ::plac::Stream stream{audio_buffer, flow};
-  std::atomic<::plac::Status> status{::plac::Status::run};
+  std::atomic<::plac::AlsaAudioDevice::Status> status{::plac::AlsaAudioDevice::Status::run};
   std::thread audio{};
 
   bool first{true};
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     }
     if (first) {
       first = false;
-      device.Init(stream.format_, 0);
+      device.Init(stream.format_, ::plac::AlsaAudioDevice::LogLevel::non_verbose);
       stream.FillBuffer();
       audio = std::thread{&::plac::AlsaAudioDevice::Playback, std::ref(device), std::ref(status)};
     }
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (audio.joinable()) {
-    status = ::plac::Status::drain;
+    status = ::plac::AlsaAudioDevice::Status::drain;
     audio.join();
   }
 

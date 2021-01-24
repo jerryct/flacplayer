@@ -8,7 +8,7 @@ namespace plac {
 
 namespace {
 
-FLAC__StreamDecoderReadStatus read_callback(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes,
+FLAC__StreamDecoderReadStatus read_callback(const FLAC__StreamDecoder *, FLAC__byte *buffer, size_t *bytes,
                                             void *client_data) {
   Stream *dec = static_cast<Stream *>(client_data);
 
@@ -28,7 +28,7 @@ FLAC__StreamDecoderReadStatus read_callback(const FLAC__StreamDecoder *decoder, 
   }
 }
 
-FLAC__StreamDecoderWriteStatus write_callback(const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame,
+FLAC__StreamDecoderWriteStatus write_callback(const FLAC__StreamDecoder *, const FLAC__Frame *frame,
                                               const FLAC__int32 *const buffer[], void *client_data) {
   const Stream *stream = static_cast<Stream *>(client_data);
 
@@ -66,15 +66,16 @@ FLAC__StreamDecoderWriteStatus write_callback(const FLAC__StreamDecoder *decoder
   return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
 
-void error_callback(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client_data) {
+void error_callback(const FLAC__StreamDecoder *, FLAC__StreamDecoderErrorStatus, void *) {
   LOG_ERROR("FLAC error callback");
 }
 
-static int tagcompare(const char *s1, const char *s2, int n) {
+int tagcompare(const char *s1, const char *s2, int n) {
   int c = 0;
   while (c < n) {
-    if (toupper(s1[c]) != toupper(s2[c]))
+    if (toupper(s1[c]) != toupper(s2[c])) {
       return !0;
+    }
     c++;
   }
   return 0;
@@ -101,7 +102,7 @@ const char *vorbis_comment_query(const FLAC__StreamMetadata_VorbisComment &vc, c
   return "<none>"; /* didn't find anything */
 }
 
-void metadata_callback(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *client_data) {
+void metadata_callback(const FLAC__StreamDecoder *, const FLAC__StreamMetadata *metadata, void *client_data) {
   if (metadata->type == FLAC__METADATA_TYPE_STREAMINFO) {
     Stream *stream = static_cast<Stream *>(client_data);
     stream->format_.rate = metadata->data.stream_info.sample_rate;

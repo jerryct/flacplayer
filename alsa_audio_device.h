@@ -11,30 +11,31 @@
 
 namespace plac {
 
-struct Params {
-  // wakeup interval in # frames
-  //
-  //  - The latency is defined by the buffer size.
-  //  - The wakeup interval is defined by the fragment size.
-  //
-  //  The buffer fill level will oscillate between 'full buffer' and 'full buffer minus 1x fragment size minus OS
-  //  scheduling latency'. Setting smaller fragment sizes will increase the CPU load and decrease battery time since
-  //  you force the CPU to wake up more often. OTOH it increases drop out safety, since you fill up playback buffer
-  //  earlier. Choosing the fragment size is hence something which you should do balancing out your needs between
-  //  power consumption and drop-out safety. With modern processors and a good OS scheduler like the Linux one setting
-  //  the fragment size to anything other than half the buffer size does not make much sense.
-  //
-  //  ... (Oh, ALSA uses the term 'period' for what I call 'fragment' above. It's synonymous)
-  //
-  // From: https://stackoverflow.com/questions/24040672/the-meaning-of-period-in-alsa/24049739#24049739
-  snd_pcm_uframes_t period_size;
-  // buffer size in # frames
-  snd_pcm_uframes_t buffer_size;
-};
-
-enum class Status : int { run, drain };
-
 struct AlsaAudioDevice {
+  struct Params {
+    // wakeup interval in # frames
+    //
+    //  - The latency is defined by the buffer size.
+    //  - The wakeup interval is defined by the fragment size.
+    //
+    //  The buffer fill level will oscillate between 'full buffer' and 'full buffer minus 1x fragment size minus OS
+    //  scheduling latency'. Setting smaller fragment sizes will increase the CPU load and decrease battery time since
+    //  you force the CPU to wake up more often. OTOH it increases drop out safety, since you fill up playback buffer
+    //  earlier. Choosing the fragment size is hence something which you should do balancing out your needs between
+    //  power consumption and drop-out safety. With modern processors and a good OS scheduler like the Linux one setting
+    //  the fragment size to anything other than half the buffer size does not make much sense.
+    //
+    //  ... (Oh, ALSA uses the term 'period' for what I call 'fragment' above. It's synonymous)
+    //
+    // From: https://stackoverflow.com/questions/24040672/the-meaning-of-period-in-alsa/24049739#24049739
+    snd_pcm_uframes_t period_size;
+    // buffer size in # frames
+    snd_pcm_uframes_t buffer_size;
+  };
+
+  enum class Status : int { run, drain };
+  enum class LogLevel { verbose, non_verbose };
+
   AlsaAudioDevice(AudioBuffer<228000> &audio_buffer, FlowControl &flow)
       : handle_{nullptr}, format_{}, params_{}, audio_buffer_{audio_buffer}, flow_{flow} {
     int open_mode = 0;
@@ -54,7 +55,7 @@ struct AlsaAudioDevice {
   AlsaAudioDevice &operator=(AlsaAudioDevice &&) = delete;
   ~AlsaAudioDevice() noexcept { snd_pcm_close(handle_); }
 
-  void Init(const AudioFormat format, const int verbose);
+  void Init(const AudioFormat format, const LogLevel log_level);
   void Playback(std::atomic<Status> &status);
 
   snd_pcm_t *handle_;

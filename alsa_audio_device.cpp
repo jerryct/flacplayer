@@ -9,13 +9,14 @@ namespace {
 void show_available_sample_formats(snd_pcm_t *handle_, snd_pcm_hw_params_t *params) {
   fprintf(stderr, "Available formats:\n");
   for (int format = 0; format <= SND_PCM_FORMAT_LAST; format++) {
-    if (snd_pcm_hw_params_test_format(handle_, params, static_cast<snd_pcm_format_t>(format)) == 0)
+    if (snd_pcm_hw_params_test_format(handle_, params, static_cast<snd_pcm_format_t>(format)) == 0) {
       fprintf(stderr, "- %s\n", snd_pcm_format_name(static_cast<snd_pcm_format_t>(format)));
+    }
   }
 }
 
 struct Logger {
-  Logger() {
+  Logger() : log{} {
     int err = snd_output_stdio_attach(&log, stderr, 0);
     ENSURES(err >= 0, "cannot attach stdio: {}", snd_strerror(err));
   }
@@ -30,18 +31,18 @@ struct Logger {
 
 } // namespace
 
-void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
+void AlsaAudioDevice::Init(const AudioFormat f, const LogLevel log_level) {
   AudioFormat info = f;
   Logger log;
 
-  int err;
+  int err{};
 
   snd_pcm_hw_params_t *params;
   snd_pcm_hw_params_alloca(&params);
   err = snd_pcm_hw_params_any(handle_, params);
   ENSURES(err >= 0, "broken configuration for this PCM: no configurations available");
 
-  if (verbose) {
+  if (LogLevel::verbose == log_level) {
     fprintf(stderr, "HW Params of device \"%s\":\n", snd_pcm_name(handle_));
     fprintf(stderr, "--------------------\n");
     snd_pcm_hw_params_dump(params, log.log);
@@ -51,7 +52,7 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   err = snd_pcm_hw_params_set_access(handle_, params, SND_PCM_ACCESS_RW_INTERLEAVED);
   ENSURES(err >= 0, "access type not available");
 
-  snd_pcm_format_t format;
+  snd_pcm_format_t format{};
   if (info.bits == 16) {
     format = SND_PCM_FORMAT_S16_LE;
   } else if (info.bits == 24) {
@@ -75,7 +76,7 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   ENSURES(err >= 0, "cannot set rate near");
   ENSURES(rate == info.rate, "rate modified");
 
-  Params p;
+  Params p{};
   p.buffer_size = AsFrames(f, 228000);
   const unsigned buffer_period_ratio{4};
   p.period_size = p.buffer_size / buffer_period_ratio;
@@ -116,7 +117,7 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
     exit(EXIT_FAILURE);
   }
 
-  if (verbose) {
+  if (LogLevel::verbose == log_level) {
     snd_pcm_dump(handle_, log.log);
   }
 
@@ -127,7 +128,7 @@ void AlsaAudioDevice::Init(const AudioFormat f, const int verbose) {
   EXPECTS(info == f, "");
   EXPECTS(format_ == f, "");
 
-  snd_pcm_hw_params_get_period_size(params, &params_.period_size, 0);
+  snd_pcm_hw_params_get_period_size(params, &params_.period_size, nullptr);
   EXPECTS(p.period_size == params_.period_size, "");
   snd_pcm_hw_params_get_buffer_size(params, &params_.buffer_size);
   EXPECTS(p.buffer_size == params_.buffer_size, "");
@@ -155,9 +156,8 @@ void AlsaAudioDevice::Playback(std::atomic<Status> &status) {
     auto writer = [this](AudioFormat, const u_char *const data, const size_t count) -> snd_pcm_sframes_t {
       if (count < params_.period_size) {
         return -EINVAL;
-      } else {
-        return snd_pcm_writei(handle_, data, params_.period_size);
       }
+      return snd_pcm_writei(handle_, data, params_.period_size);
     };
     audio_buffer_.Drain(format_, writer);
     snd_pcm_nonblock(handle_, /* block= */ 0);
