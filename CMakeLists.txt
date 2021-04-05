@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(flacplayer CXX)
+enable_testing()
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS Off)
@@ -65,10 +66,15 @@ add_executable(unit_tests
   audio_buffer_unit_test.cpp
   audio_format_unit_test.cpp
   file_desc_unit_test.cpp
-  flac_decode_unit_test.cpp
   stream_unit_test.cpp
 )
 target_link_libraries(unit_tests PRIVATE plac gtest_main)
+add_test(unit_tests unit_tests)
+
+add_executable(flac_decode
+  flac_decode_unit_test.cpp
+)
+target_link_libraries(flac_decode PRIVATE plac gtest_main)
 
 add_executable(benchmarks
   audio_buffer_benchmark.cpp
