@@ -102,7 +102,7 @@ build assets/24bps_part14.flac: flac assets/24bps_part14.bin
 rule gen_profdata
     command = llvm-profdata-8 merge -sparse $in -o $out
 rule gen_html
-    command =  llvm-cov-8 show -format=html -output-dir=$out $binary -instr-profile=$in
+    command =  llvm-cov-8 show -Xdemangler c++filt -Xdemangler -n -format=html -output-dir=$out $binary -instr-profile=$in
 
 build default.profdata: gen_profdata _build_debug/default.profraw
 build cov: gen_html default.profdata
