@@ -43,6 +43,7 @@ add_subdirectory(../googletest _build/googletest)
 add_subdirectory(../fmt _build/fmt)
 
 add_library(plac
+  align.h
   as_const.h
   audio_buffer.h
   audio_format.h
@@ -63,6 +64,7 @@ add_executable(flacplayer
 target_link_libraries(flacplayer PRIVATE asound plac)
 
 add_executable(unit_tests
+  align_unit_test.cpp
   audio_buffer_unit_test.cpp
   audio_format_unit_test.cpp
   file_desc_unit_test.cpp

@@ -110,6 +110,10 @@ TYPED_TEST(AudioBufferTest, WriteWhenTooManyFrames) {
   EXPECT_EQ(8, this->buffer_.Write(this->format_, this->left_.cbegin(), this->right_.cbegin(), 16));
 }
 
+TYPED_TEST(AudioBufferTest, WriteWhenBelowMinimalFrames) {
+  EXPECT_EQ(0, this->buffer_.Write(this->format_, this->left_.cbegin(), this->right_.cbegin(), 2));
+}
+
 TYPED_TEST(AudioBufferTest, Read) {
   EXPECT_EQ(8, this->buffer_.Write(this->format_, this->left_.cbegin(), this->right_.cbegin(), 8));
 
