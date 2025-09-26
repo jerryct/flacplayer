@@ -13,10 +13,10 @@ FLAC__StreamDecoderReadStatus read_callback(const FLAC__StreamDecoder *, FLAC__b
   Stream *dec = static_cast<Stream *>(client_data);
 
   if (*bytes > 0) {
-    ssize_t r = read(dec->desc_.fd_, buffer, *bytes);
+    const ssize_t r = read(dec->desc_.fd_, buffer, *bytes);
 
+    *bytes = std::max(ssize_t{0}, r);
     if (r > 0) {
-      *bytes = r;
       return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
     } else if (r == 0) {
       return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
