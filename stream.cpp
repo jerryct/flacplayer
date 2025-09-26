@@ -67,7 +67,7 @@ FLAC__StreamDecoderWriteStatus write_callback(const FLAC__StreamDecoder *, const
 }
 
 void error_callback(const FLAC__StreamDecoder *, FLAC__StreamDecoderErrorStatus, void *) {
-  LOG_ERROR("FLAC error callback");
+  ENSURES(false, "error callback");
 }
 
 int tagcompare(const char *s1, const char *s2, int n) {
