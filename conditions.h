@@ -13,7 +13,7 @@ public:
   constexpr Printer(const fmt::string_view file, const int line, const fmt::string_view func)
       : file_{file}, func_{func}, line_{line} {}
 
-  template <typename... Ts> constexpr void operator()(const fmt::string_view s, Ts &&... v) const {
+  template <typename... Ts> constexpr void operator()(const fmt::format_string<Ts...> s, Ts &&... v) const {
     fmt::print(stderr, "flacplayer [{}:{} ({})] ", file_, line_, func_);
     fmt::print(stderr, s, std::forward<Ts>(v)...);
     fmt::print(stderr, "\n");
@@ -31,7 +31,7 @@ public:
       : p_{file, line, func} {}
 
   template <typename... Ts>
-  constexpr void operator()(const bool condition, const fmt::string_view s, Ts &&... v) const {
+  constexpr void operator()(const bool condition, const fmt::format_string<Ts...> s, Ts &&... v) const {
     if (!condition) {
       p_(s, std::forward<Ts>(v)...);
       std::abort();
