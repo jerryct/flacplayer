@@ -4,34 +4,36 @@
 #define CONDITIONS_H
 
 #include <cstdlib>
-#include <fmt/format.h>
+#include <format>
+#include <iostream>
+#include <string_view>
 
 namespace plac {
 
 class Printer {
 public:
-  constexpr Printer(const fmt::string_view file, const int line, const fmt::string_view func)
+  Printer(const std::string_view file, const int line, const std::string_view func)
       : file_{file}, func_{func}, line_{line} {}
 
-  template <typename... Ts> constexpr void operator()(const fmt::format_string<Ts...> s, Ts &&... v) const {
-    fmt::print(stderr, "flacplayer [{}:{} ({})] ", file_, line_, func_);
-    fmt::print(stderr, s, std::forward<Ts>(v)...);
-    fmt::print(stderr, "\n");
+  template <typename... Ts> void operator()(const std::format_string<Ts...> s, Ts &&... v) const {
+    std::cerr << std::format("flacplayer [{}:{} ({})] ", file_, line_, func_);
+    std::cerr << std::format(s, std::forward<Ts>(v)...);
+    std::cerr << std::format("\n");
   }
 
 private:
-  fmt::string_view file_;
-  fmt::string_view func_;
+  std::string_view file_;
+  std::string_view func_;
   int line_;
 };
 
 class Conditions {
 public:
-  constexpr Conditions(const fmt::string_view file, const int line, const fmt::string_view func)
+  Conditions(const std::string_view file, const int line, const std::string_view func)
       : p_{file, line, func} {}
 
   template <typename... Ts>
-  constexpr void operator()(const bool condition, const fmt::format_string<Ts...> s, Ts &&... v) const {
+  void operator()(const bool condition, const std::format_string<Ts...> s, Ts &&... v) const {
     if (!condition) {
       p_(s, std::forward<Ts>(v)...);
       std::abort();

@@ -2,7 +2,7 @@
 
 #include "bit_cast.h"
 #include "stream.cpp"
-#include <fmt/format.h>
+#include <string_view>
 #include <gtest/gtest.h>
 
 namespace plac {
@@ -33,17 +33,17 @@ TEST(StreamTest, VorbisComment_WhenFound) {
   vc.comments = entries;
   const char *tag0{"TAG1=foo"};
   entries[0].entry = BitCast<FLAC__byte *>(tag0);
-  entries[0].length = fmt::string_view{tag0}.size();
+  entries[0].length = std::string_view{tag0}.size();
   const char *tag1{"TAG2=bar"};
   entries[1].entry = BitCast<FLAC__byte *>(tag1);
-  entries[1].length = fmt::string_view{tag1}.size();
+  entries[1].length = std::string_view{tag1}.size();
   const char *tag2{"TAG1=xyz"};
   entries[2].entry = BitCast<FLAC__byte *>(tag2);
-  entries[2].length = fmt::string_view{tag2}.size();
+  entries[2].length = std::string_view{tag2}.size();
 
-  EXPECT_EQ(fmt::string_view{"foo"}, fmt::string_view{vorbis_comment_query(vc, "TAG1", 0)});
-  EXPECT_EQ(fmt::string_view{"xyz"}, fmt::string_view{vorbis_comment_query(vc, "TAG1", 1)});
-  EXPECT_EQ(fmt::string_view{"bar"}, fmt::string_view{vorbis_comment_query(vc, "TAG2", 0)});
+  EXPECT_EQ(std::string_view{"foo"}, std::string_view{vorbis_comment_query(vc, "TAG1", 0)});
+  EXPECT_EQ(std::string_view{"xyz"}, std::string_view{vorbis_comment_query(vc, "TAG1", 1)});
+  EXPECT_EQ(std::string_view{"bar"}, std::string_view{vorbis_comment_query(vc, "TAG2", 0)});
 }
 
 TEST(StreamTest, VorbisComment_WhenNotFound) {
@@ -53,10 +53,10 @@ TEST(StreamTest, VorbisComment_WhenNotFound) {
   vc.comments = entries;
   const char *tag0{"TAG1=foo"};
   entries[0].entry = BitCast<FLAC__byte *>(tag0);
-  entries[0].length = fmt::string_view{tag0}.size();
+  entries[0].length = std::string_view{tag0}.size();
 
-  EXPECT_EQ(fmt::string_view{"<none>"}, fmt::string_view{vorbis_comment_query(vc, "TAG1", 1)});
-  EXPECT_EQ(fmt::string_view{"<none>"}, fmt::string_view{vorbis_comment_query(vc, "TAG2", 0)});
+  EXPECT_EQ(std::string_view{"<none>"}, std::string_view{vorbis_comment_query(vc, "TAG1", 1)});
+  EXPECT_EQ(std::string_view{"<none>"}, std::string_view{vorbis_comment_query(vc, "TAG2", 0)});
 }
 
 } // namespace

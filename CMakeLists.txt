@@ -37,7 +37,6 @@ find_package(Threads REQUIRED)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "")
 add_subdirectory(../benchmark _build/benchmark)
 add_subdirectory(../googletest _build/googletest)
-add_subdirectory(../fmt _build/fmt)
 
 add_library(plac
   as_const.h
@@ -50,7 +49,7 @@ add_library(plac
   stream.cpp
   stream.h
 )
-target_link_libraries(plac PUBLIC FLAC Threads::Threads fmt)
+target_link_libraries(plac PUBLIC FLAC Threads::Threads)
 
 add_executable(flacplayer
   alsa_audio_device.cpp
