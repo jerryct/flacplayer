@@ -10,20 +10,23 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <utility>
-
 namespace plac {
 
 struct FileDesc {
   FileDesc() = default;
   FileDesc(const char *name) : fd_{open(name, O_RDONLY, 0)} {}
-  FileDesc(FileDesc &) = delete;
+  FileDesc(const FileDesc &) = delete;
   FileDesc(FileDesc &&other) noexcept : fd_{other.fd_} { other.fd_ = -1; }
-  FileDesc &operator=(FileDesc &) = delete;
+  FileDesc &operator=(const FileDesc &) = delete;
   FileDesc &operator=(FileDesc &&other) noexcept {
-    if (fd_ != other.fd_) {
-      std::swap(fd_, other.fd_);
+    if (fd_ == other.fd_){
+      return *this;
     }
+    if (IsValid()) {
+      EXPECTS(::close(fd_) == 0, "cannot close file descriptor");
+    }
+    fd_ = other.fd_;
+    other.fd_ =-1;
     return *this;
   }
   ~FileDesc() noexcept {
