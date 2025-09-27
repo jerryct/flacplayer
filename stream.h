@@ -18,7 +18,7 @@ struct Stream {
   Stream &operator=(Stream &) = delete;
   Stream &operator=(Stream &&) = delete;
   ~Stream() noexcept {
-    FLAC__stream_decoder_finish(decoder_);
+    EXPECTS(FLAC__stream_decoder_finish(decoder_), "cannot finish decoding");
     FLAC__stream_decoder_delete(decoder_);
   }
 
@@ -28,7 +28,7 @@ struct Stream {
       return false;
     }
 
-    FLAC__stream_decoder_reset(decoder_);
+    ENSURES(FLAC__stream_decoder_reset(decoder_), "cannot reset decoder");
     desc_ = FileDesc{name};
     if (!desc_.IsValid()) {
       LOG_ERROR("invalid file: {}", name);

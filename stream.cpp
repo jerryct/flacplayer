@@ -122,7 +122,9 @@ void metadata_callback(const FLAC__StreamDecoder *, const FLAC__StreamMetadata *
 
 Stream::Stream(AudioBuffer<228000> &audio_buffer, FlowControl &flow)
     : decoder_{FLAC__stream_decoder_new()}, desc_{}, format_{}, audio_buffer_{audio_buffer}, flow_{flow} {
-  FLAC__stream_decoder_set_metadata_respond(decoder_, FLAC__METADATA_TYPE_VORBIS_COMMENT);
+  ENSURES(decoder_ != nullptr, "cannot create FLAC decoder");
+  FLAC__bool ret =  FLAC__stream_decoder_set_metadata_respond(decoder_, FLAC__METADATA_TYPE_VORBIS_COMMENT);
+  ENSURES(ret == true, "cannot query vorbis comment");
   FLAC__StreamDecoderInitStatus init_status =
       FLAC__stream_decoder_init_stream(decoder_, read_callback, nullptr, nullptr, nullptr, nullptr, write_callback,
                                        metadata_callback, error_callback, this);
