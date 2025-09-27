@@ -17,27 +17,9 @@ struct Stream {
   Stream(Stream &&) = delete;
   Stream &operator=(Stream &) = delete;
   Stream &operator=(Stream &&) = delete;
-  ~Stream() noexcept {
-    EXPECTS(FLAC__stream_decoder_finish(decoder_), "cannot finish decoding");
-    FLAC__stream_decoder_delete(decoder_);
-  }
+  ~Stream() noexcept;
 
-  bool Reset(const char *name) {
-    if (name == nullptr) {
-      LOG_ERROR("nullptr provided");
-      return false;
-    }
-
-    ENSURES(FLAC__stream_decoder_reset(decoder_), "cannot reset decoder");
-    desc_ = FileDesc{name};
-    if (!desc_.IsValid()) {
-      LOG_ERROR("invalid file: {}", name);
-      return false;
-    }
-    const FLAC__bool ret{FLAC__stream_decoder_process_until_end_of_metadata(decoder_)};
-    return ret != 0;
-  }
-
+  bool Reset(const char *name);
   void Decode();
   void FillBuffer();
 
