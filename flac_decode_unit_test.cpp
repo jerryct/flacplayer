@@ -72,7 +72,9 @@ TEST_F(FlacDecodeTest, Play16Bps) {
 
     FLAC__StreamDecoderState state = FLAC__stream_decoder_get_state(stream.decoder_);
     while (state != FLAC__STREAM_DECODER_END_OF_STREAM) {
-      audio_buffer_.Read(stream.format_, 5513, writer);
+      const ssize_t r{audio_buffer_.Read(stream.format_, 5513, writer)};
+      ASSERT_GE(r, 0);
+      ASSERT_LE(r, 5513);
 
       ASSERT_TRUE(FLAC__stream_decoder_process_single(stream.decoder_));
       state = FLAC__stream_decoder_get_state(stream.decoder_);
@@ -111,7 +113,9 @@ TEST_F(FlacDecodeTest, Play24Bps) {
 
     FLAC__StreamDecoderState state = FLAC__stream_decoder_get_state(stream.decoder_);
     while (state != FLAC__STREAM_DECODER_END_OF_STREAM) {
-      audio_buffer_.Read(stream.format_, 5513, writer);
+      const ssize_t r{audio_buffer_.Read(stream.format_, 5513, writer)};
+      ASSERT_GE(r, 0);
+      ASSERT_LE(r, 5513);
 
       ASSERT_TRUE(FLAC__stream_decoder_process_single(stream.decoder_));
       state = FLAC__stream_decoder_get_state(stream.decoder_);
