@@ -25,7 +25,7 @@ public:
         std::uint32_t interleaved{static_cast<std::uint32_t>(right[i])};
         interleaved <<= 16;
         interleaved |= static_cast<std::uint32_t>(left[i]) & 0xFFFF;
-        std::memcpy(&data_[in_], &interleaved, 4);
+        __builtin_memcpy(&data_[in_], &interleaved, 4);
 
         in_ += 4;
         if (in_ == N) {
@@ -37,7 +37,7 @@ public:
         std::uint64_t interleaved{static_cast<std::uint32_t>(right[i])};
         interleaved <<= 24;
         interleaved |= static_cast<std::uint64_t>(left[i]) & 0xFFFFFF;
-        std::memcpy(&data_[in_], &interleaved, 6);
+        __builtin_memcpy(&data_[in_], &interleaved, 6);
 
         in_ += 6;
         if (in_ == N) {
