@@ -12,9 +12,6 @@ if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" OR "${CMAKE_SYSTEM_PROCESSOR}" 
     $<$<CONFIG:Debug>:-fsanitize=address,undefined,leak>
     $<$<AND:$<CXX_COMPILER_ID:Clang>,$<CONFIG:Debug>>:-fprofile-instr-generate>
     $<$<AND:$<CXX_COMPILER_ID:Clang>,$<CONFIG:Debug>>:-fcoverage-mapping>
-    $<$<CXX_COMPILER_ID:GNU>:-ftree-vectorize>
-    $<$<CXX_COMPILER_ID:GNU>:-fopt-info-vec-optimized>
-    -march=nehalem
   )
   list(APPEND DEFAULT_LINKOPTS
     $<$<CONFIG:Debug>:-fsanitize=address,undefined,leak>
