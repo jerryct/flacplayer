@@ -11,6 +11,12 @@
 namespace plac {
 namespace {
 
+std::int32_t SignExtend(const std::uint32_t x, const std::uint32_t b) {
+    // https://graphics.stanford.edu/~seander/bithacks.html#VariableSignExtend
+    const std::uint32_t m{1U << (b - 1)};
+    return (x ^ m) - m;
+}
+
 struct Reader {
   ssize_t operator()(const AudioFormat format, const u_char *data, const size_t count) {
     if (do_error_injection_) {
@@ -22,10 +28,10 @@ struct Reader {
       for (size_t i{0}; i < count; ++i) {
         int left{};
         std::memcpy(&left, &data[frame_size * i], channel_size);
-        left_.push_back(left);
+        left_.push_back(SignExtend(left, format.bits));
         int right{};
         std::memcpy(&right, &data[frame_size * i + channel_size], channel_size);
-        right_.push_back(right);
+        right_.push_back(SignExtend(right, format.bits));
       }
       return static_cast<ssize_t>(count);
     }
@@ -116,6 +122,17 @@ TYPED_TEST(AudioBufferTest, Read) {
   EXPECT_EQ(8, this->buffer_.Read(this->format_, 8, this->reader_));
   EXPECT_EQ(this->reader_.left_, (std::vector<int>{1, 2, 3, 4, 5, 6, 7, 8}));
   EXPECT_EQ(this->reader_.right_, (std::vector<int>{16, 15, 14, 13, 12, 11, 10, 9}));
+}
+
+TYPED_TEST(AudioBufferTest, ReadWhenNegative) {
+    std::transform(this->left_.begin(), this->left_.end(), this->left_.begin(), std::negate<int>{});
+    std::transform(this->right_.begin(), this->right_.end(), this->right_.begin(), std::negate<int>{});
+
+    EXPECT_EQ(8, this->buffer_.Write(this->format_, this->left_.cbegin(), this->right_.cbegin(), 8));
+
+    EXPECT_EQ(8, this->buffer_.Read(this->format_, 8, this->reader_));
+    EXPECT_EQ(this->reader_.left_, (std::vector<int>{-1, -2, -3, -4, -5, -6, -7, -8}));
+    EXPECT_EQ(this->reader_.right_, (std::vector<int>{-16, -15, -14, -13, -12, -11, -10, -9}));
 }
 
 TYPED_TEST(AudioBufferTest, ReadWhenEmpty) {
