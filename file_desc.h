@@ -19,14 +19,14 @@ struct FileDesc {
   FileDesc(FileDesc &&other) noexcept : fd_{other.fd_} { other.fd_ = -1; }
   FileDesc &operator=(const FileDesc &) = delete;
   FileDesc &operator=(FileDesc &&other) noexcept {
-    if (fd_ == other.fd_){
+    if (fd_ == other.fd_) {
       return *this;
     }
     if (IsValid()) {
       EXPECTS(::close(fd_) == 0, "cannot close file descriptor");
     }
     fd_ = other.fd_;
-    other.fd_ =-1;
+    other.fd_ = -1;
     return *this;
   }
   ~FileDesc() noexcept {

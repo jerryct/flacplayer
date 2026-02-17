@@ -12,14 +12,19 @@ namespace plac {
 
 class Printer {
 public:
-  Printer(const std::string_view file, const int line, const std::string_view func)
-      : file_{file}, func_{func}, line_{line} {}
+    Printer(const std::string_view file, const int line, const std::string_view func)
+        : file_{file}
+        , func_{func}
+        , line_{line}
+    {}
 
-  template <typename... Ts> void operator()(const std::format_string<Ts...> s, Ts &&... v) const {
-    std::cerr << std::format("flacplayer [{}:{} ({})] ", file_, line_, func_);
-    std::cerr << std::format(s, std::forward<Ts>(v)...);
-    std::cerr << std::format("\n");
-  }
+    template<typename... Ts>
+    void operator()(const std::format_string<Ts...> s, Ts &&...v) const
+    {
+        std::cerr << std::format("flacplayer [{}:{} ({})] ", file_, line_, func_);
+        std::cerr << std::format(s, std::forward<Ts>(v)...);
+        std::cerr << std::format("\n");
+    }
 
 private:
   std::string_view file_;
@@ -29,15 +34,17 @@ private:
 
 class Conditions {
 public:
-  Conditions(const std::string_view file, const int line, const std::string_view func)
-      : p_{file, line, func} {}
+    Conditions(const std::string_view file, const int line, const std::string_view func)
+        : p_{file, line, func}
+    {}
 
-  template <typename... Ts>
-  void operator()(const bool condition, const std::format_string<Ts...> s, Ts &&... v) const {
-    if (!condition) {
-      p_(s, std::forward<Ts>(v)...);
-      std::abort();
-    }
+    template<typename... Ts>
+    void operator()(const bool condition, const std::format_string<Ts...> s, Ts &&...v) const
+    {
+        if (!condition) {
+            p_(s, std::forward<Ts>(v)...);
+            std::abort();
+        }
   }
 
 private:

@@ -1,7 +1,7 @@
 pcm.write_file {
     type file
     slave {
-        pcm plug_uln2
+        pcm null
     }
     file "uln2-raw-%f-%r-%c.raw"
     format "raw"

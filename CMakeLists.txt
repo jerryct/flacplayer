@@ -39,21 +39,20 @@ add_subdirectory(../benchmark _build/benchmark)
 add_subdirectory(../googletest _build/googletest)
 
 add_library(plac
+  alsa_audio_device.cpp
+  alsa_audio_device.h
   as_const.h
   audio_buffer.h
   audio_format.h
   bit_cast.h
   conditions.h
   file_desc.h
-  flow_control.h
   stream.cpp
   stream.h
 )
-target_link_libraries(plac PUBLIC FLAC Threads::Threads)
+target_link_libraries(plac PUBLIC FLAC asound Threads::Threads)
 
 add_executable(flacplayer
-  alsa_audio_device.cpp
-  alsa_audio_device.h
   linux_player.cpp
 )
 target_link_libraries(flacplayer PRIVATE asound plac)

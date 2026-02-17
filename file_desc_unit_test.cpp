@@ -37,7 +37,7 @@ TEST(FileDescTest, MoveAssignment) {
 TEST(FileDescTest, SelfMoveAssignment) {
     FileDesc f{"/dev/null"};
     EXPECT_TRUE(f.IsValid());
-    FileDesc& alias{f}; // silence warning for intentional self-assign
+    FileDesc &alias{f}; // silence warning for intentional self-assign
     f = std::move(alias);
     EXPECT_TRUE(f.IsValid());
 }

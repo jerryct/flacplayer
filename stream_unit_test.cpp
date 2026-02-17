@@ -2,8 +2,8 @@
 
 #include "bit_cast.h"
 #include "stream.cpp"
-#include <string_view>
 #include <gtest/gtest.h>
+#include <string_view>
 
 namespace plac {
 namespace {
