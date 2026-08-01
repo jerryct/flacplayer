@@ -2,6 +2,7 @@
 
 #include "stream.h"
 #include <cctype>
+#include <chrono>
 #include <cstring>
 
 namespace plac {
@@ -14,14 +15,43 @@ FLAC__StreamDecoderReadStatus read_callback(const FLAC__StreamDecoder *,
     Stream *dec = static_cast<Stream *>(client_data);
 
     if (*bytes > 0) {
-        const ssize_t r = read(dec->desc_.fd_, buffer, *bytes);
+        //LOG_ERROR("read {}", *bytes);
 
-        *bytes = std::max(ssize_t{0}, r);
+        auto x = std::chrono::steady_clock::now();
+        auto *cqe = dec->ring.Wait();
+        auto y = std::chrono::steady_clock::now();
+
+        if (cqe == nullptr) {
+            *bytes = 0;
+            return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
+        }
+
+        //const ssize_t r = read(dec->desc_.fd_, buffer, *bytes);
+
+        const ssize_t r = cqe->res;
+
+        // if (r >= 0) {
+        // }
+        // *bytes = std::max(ssize_t{0}, r);
+        //LOG_ERROR("written {}", r);
+
         if (r > 0) {
+            *bytes = std::min(*bytes, static_cast<size_t>(r));
+            //LOG_ERROR("copy {}", *bytes);
+            std::memcpy(buffer, dec->ring.buf.data(), *bytes);
+            io_uring_cqe_seen(&(dec->ring.ring), cqe);
+            dec->ring.offset += *bytes;
+            auto z = std::chrono::steady_clock::now();
+            dec->ring.ReadFixed(dec->desc_.fd_, dec->ring.buf.data(), 8192);
+            LOG_ERROR("submit {}", (std::chrono::steady_clock::now() - z) + (y - x));
             return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
         } else if (r == 0) {
+            *bytes = 0;
+            io_uring_cqe_seen(&(dec->ring.ring), cqe);
             return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
         } else {
+            *bytes = 0;
+            io_uring_cqe_seen(&(dec->ring.ring), cqe);
             return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
         }
     } else {
@@ -162,6 +192,11 @@ bool Stream::Reset(const char *name) {
         LOG_ERROR("invalid file: {}", name);
         return false;
     }
+
+    io_uring_unregister_files(&ring.ring);
+    io_uring_register_files(&ring.ring, &desc_.fd_, 1);
+    ring.offset = 0;
+    ring.ReadFixed(desc_.fd_, ring.buf.data(), ring.buf.size());
     const FLAC__bool ret{FLAC__stream_decoder_process_until_end_of_metadata(decoder_)};
     return ret != 0;
 }

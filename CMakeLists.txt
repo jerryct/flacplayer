@@ -47,10 +47,13 @@ add_library(plac
   bit_cast.h
   conditions.h
   file_desc.h
+  ring.cpp
+  ring.h
   stream.cpp
   stream.h
 )
-target_link_libraries(plac PUBLIC FLAC asound Threads::Threads)
+target_include_directories(plac PUBLIC /home/jerry/playground/liburing/src/include)
+target_link_libraries(plac PUBLIC FLAC asound Threads::Threads /home/jerry/playground/liburing/src/liburing.so.2.15)
 
 add_executable(flacplayer
   linux_player.cpp

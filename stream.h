@@ -6,6 +6,7 @@
 #include "alsa_audio_device.h"
 #include "audio_format.h"
 #include "file_desc.h"
+#include "ring.h"
 #include <FLAC/stream_decoder.h>
 
 namespace plac {
@@ -26,6 +27,8 @@ struct Stream {
   AudioFormat format_;
 
   ::plac::AlsaAudioDevice device_;
+
+  Ring ring;
 };
 
 } // namespace plac
