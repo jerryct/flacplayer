@@ -11,7 +11,8 @@ int main(int argc, char *argv[]) {
     CPU_ZERO(&cpu_set);
     CPU_SET(3, &cpu_set);
     // to make affinity work,
-    // fence cpu `isolcpus=3 irqaffinity=0-2` in /boot/firmware/cmdline.txt
+    // fence cpu `isolcpus=3 rcu_nocbs=3 nohz_full=3 irqaffinity=0-2` in /boot/firmware/cmdline.txt
+    // explanation of nohz_full https://www.suse.com/c/cpu-isolation-introduction-part-1/
     if (::sched_setaffinity(0, sizeof(cpu_set), &cpu_set) != 0) {
         LOG_ERROR("failed to set CPU affinity");
     }
@@ -20,7 +21,10 @@ int main(int argc, char *argv[]) {
     // check that PREEMPT_RT is enabled with `cat /sys/kernel/realtime`. expected value is 1
 
     sched_param param{};
-    param.sched_priority = 60; // sched_get_priority_max(SCHED_FIFO);
+    // stay below 50 which is the default RT priority for interrupts.
+    // relevant interrupts are USB for audio and disk
+    // list them with `sudo cat /proc/interrupts `
+    param.sched_priority = 40;
     if (::sched_setscheduler(0, SCHED_FIFO, &param) != 0) {
         // if EPERM is returned,
         // add capability for the file with `sudo setcap 'cap_sys_nice=eip' <path>/flacplayer`
