@@ -4,7 +4,8 @@
 #include "stream.h"
 #include <sched.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[])
+{
     EXPECTS(argc > 1, "no file provided");
 
     cpu_set_t cpu_set;
@@ -13,7 +14,8 @@ int main(int argc, char *argv[]) {
     // to make affinity work,
     // fence cpu `isolcpus=3 rcu_nocbs=3 nohz_full=3 irqaffinity=0-2` in /boot/firmware/cmdline.txt
     // explanation of nohz_full https://www.suse.com/c/cpu-isolation-introduction-part-1/
-    if (::sched_setaffinity(0, sizeof(cpu_set), &cpu_set) != 0) {
+    if (::sched_setaffinity(0, sizeof(cpu_set), &cpu_set) != 0)
+    {
         LOG_ERROR("failed to set CPU affinity");
     }
 
@@ -25,7 +27,8 @@ int main(int argc, char *argv[]) {
     // relevant interrupts are USB for audio and disk
     // list them with `sudo cat /proc/interrupts `
     param.sched_priority = 40;
-    if (::sched_setscheduler(0, SCHED_FIFO, &param) != 0) {
+    if (::sched_setscheduler(0, SCHED_FIFO, &param) != 0)
+    {
         // if EPERM is returned,
         // add capability for the file with `sudo setcap 'cap_sys_nice=eip' <path>/flacplayer`
         // check it with `getcap <path>/flacplayer`
@@ -35,15 +38,19 @@ int main(int argc, char *argv[]) {
     ::plac::Stream stream{plac::AlsaAudioDevice::Output::uln2};
 
     bool first{true};
-    while (optind <= (argc - 1)) {
-        if (!stream.Reset(argv[optind++])) {
+    while (optind <= (argc - 1))
+    {
+        if (!stream.Reset(argv[optind++]))
+        {
             continue;
         }
-        if (first) {
+        if (first)
+        {
             first = false;
             stream.device_.Init(stream.format_, ::plac::AlsaAudioDevice::LogLevel::non_verbose);
         }
-        if (stream.device_.format_ != stream.format_) {
+        if (stream.device_.format_ != stream.format_)
+        {
             LOG_ERROR("audio format mismatch");
             break;
         }
