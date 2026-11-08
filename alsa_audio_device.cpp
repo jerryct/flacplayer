@@ -100,7 +100,7 @@ ssize_t Copy(snd_pcm_t* handle_,
             const snd_pcm_sframes_t r{snd_pcm_avail(handle_)};
             if (r < format.rate)
             {
-                LOG_ERROR("low hardware buffer {}\n", r);
+                LOG_ERROR("low hardware buffer {}", r);
             }
             return std::min(r, 0L);
         }
